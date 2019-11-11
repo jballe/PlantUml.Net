@@ -4,9 +4,9 @@ namespace PlantUml.Net.Tools
 {
     internal class ProcessHelper
     {
-        public IProcessResult RunProcessWithInput(string fileName, string arguments, string input)
+        public IProcessResult RunProcessWithInput(string fileName, string arguments, string input, string workingDirectory = null)
         {
-            ProcessStartInfo processStartInfo = GetProcessStartInfo(fileName, arguments);
+            ProcessStartInfo processStartInfo = GetProcessStartInfo(fileName, arguments, workingDirectory);
 
             using (Process process = Process.Start(processStartInfo))
             {
@@ -20,7 +20,7 @@ namespace PlantUml.Net.Tools
             }
         }
 
-        private static ProcessStartInfo GetProcessStartInfo(string command, string arguments)
+        private static ProcessStartInfo GetProcessStartInfo(string command, string arguments, string workingDirectory)
         {
             return new ProcessStartInfo(command)
             {
@@ -30,8 +30,9 @@ namespace PlantUml.Net.Tools
                 WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                Arguments = arguments
-            };
+                Arguments = arguments,
+                WorkingDirectory = workingDirectory ?? System.IO.Directory.GetCurrentDirectory(),
+        };
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using PlantUml.Net.Java;
 using PlantUml.Net.Local;
+using PlantUml.Net.LocalEncode;
 using PlantUml.Net.Remote;
 
 namespace PlantUml.Net
@@ -28,6 +29,9 @@ namespace PlantUml.Net
                     JarRunner jarRunner = CreateJarRunner(settings);
                     LocalCommandProvider commandProvider = new LocalCommandProvider(settings.LocalGraphvizDotPath);
                     return new LocalPlantUmlRenderer(jarRunner, commandProvider, renderUrlCalculator);
+
+                case RenderingMode.LocalEncode:
+                    return new LocalEncodePlantUmlRenderer(CreateJarRunner(settings), urlFormatMap);
 
                 default:
                     throw new ArgumentException("invalid rendering mode", nameof(settings.RenderingMode));
