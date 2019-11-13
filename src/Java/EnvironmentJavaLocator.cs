@@ -7,9 +7,19 @@ namespace PlantUml.Net.Java
     {
         public string GetJavaInstallationPath()
         {
-            string javaHome = Environment.GetEnvironmentVariable("JAVA_HOME").Trim('"');
+            string javaHome = Environment.GetEnvironmentVariable("JAVA_HOME")?.Trim('"');
+            if (string.IsNullOrEmpty(javaHome))
+            {
+                throw new InvalidOperationException("No JAVA_HOME env variable defined");
+            }
 
-            return Path.Combine(javaHome, "bin", "java.exe");
+            var path = Path.Combine(javaHome, "bin", "java.exe");
+            if (!File.Exists(path))
+            {
+                throw new InvalidOperationException("No java found at " + path);
+            }
+
+            return path;
         }
     }
 }

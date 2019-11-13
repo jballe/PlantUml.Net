@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlantUml.Net.LocalEncode
+namespace PlantUml.Net.InputModes
 {
-    public class RemoteUrlCalculator
+    public class PipeInput
     {
+
     }
 }

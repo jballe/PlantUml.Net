@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using PlantUml.Net.Tools;
 
 namespace PlantUml.Net.Java
@@ -18,7 +19,7 @@ namespace PlantUml.Net.Java
         public IProcessResult RunJarWithInput(string input, params string[] arguments)
         {
             ValidateJavaPath();
-            var argumentString = $"-jar \"{jarPath}\" {string.Join(" ", arguments)}";
+            var argumentString = $"-jar \"{jarPath}\" {string.Join(" ", arguments.Where(x => x != null))}";
             return new ProcessHelper().RunProcessWithInput(javaPath, argumentString, input);
         }
 

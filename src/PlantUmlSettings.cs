@@ -1,4 +1,6 @@
-﻿namespace PlantUml.Net
+﻿using System;
+
+namespace PlantUml.Net
 {
     public class PlantUmlSettings
     {
@@ -32,11 +34,14 @@
         /// </summary>
         public RenderingMode RenderingMode { get; set; }
 
+        public InputMode InputMode { get; set; }
+
         public PlantUmlSettings()
         {
             RenderingMode = RenderingMode.Remote;
             RemoteUrl = "http://www.plantuml.com/plantuml/";
-            LocalPlantUmlPath = "plantuml.jar";
+            LocalPlantUmlPath = Environment.GetEnvironmentVariable("PLANTUML_JAR") ?? "plantuml.jar";
+            LocalGraphvizDotPath = Environment.GetEnvironmentVariable("GRAPHVIZ_DOT");
         }
     }
 }
