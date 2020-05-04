@@ -39,7 +39,7 @@ namespace PlantUml.Net
         public PlantUmlSettings()
         {
             RenderingMode = RenderingMode.Remote;
-            RemoteUrl = "http://www.plantuml.com/plantuml/";
+            RemoteUrl = "https://www.plantuml.com/plantuml/";
             LocalPlantUmlPath = Environment.GetEnvironmentVariable("PLANTUML_JAR") ?? "plantuml.jar";
             LocalGraphvizDotPath = Environment.GetEnvironmentVariable("GRAPHVIZ_DOT");
         }
