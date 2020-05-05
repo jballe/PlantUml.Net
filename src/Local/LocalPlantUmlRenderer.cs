@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using PlantUml.Net.InputModes;
 using PlantUml.Net.Java;
 using static System.Text.Encoding;
@@ -22,16 +23,33 @@ namespace PlantUml.Net.Local
         {
             using (var input = inputFactory.Create(code))
             {
-                string command = commandProvider.GetCommand(outputFormat);
+                var command = commandProvider.GetCommand(outputFormat);
                 var processResult = jarRunner.RunJarWithInput(input.Input, command, input.Argument);
-
                 if (processResult.ExitCode != 0)
                 {
-                    string message = UTF8.GetString(processResult.Error);
+                    var message = UTF8.GetString(processResult.Error);
                     throw new RenderingException(code, message);
                 }
 
-                return processResult.Output;
+                if (processResult.Output?.Length > 0)
+                {
+                    return processResult.Output;
+                }
+
+                var fileInput = input as FileInputResult;
+
+                if (fileInput != null)
+                {
+                    var expectedOutputFile = fileInput.OutputFile + $".{outputFormat.ToString().ToLowerInvariant()}";
+                    if (File.Exists(expectedOutputFile))
+                    {
+                        var result = File.ReadAllBytes(expectedOutputFile);
+                        File.Delete(expectedOutputFile);
+                        return result;
+                    }
+                }
+
+                throw new ArgumentException($"Processed image without errors but no output was found {command} {input.Argument}");
             }
         }
 
@@ -40,6 +58,12 @@ namespace PlantUml.Net.Local
             var bytes = Render(code, outputFormat);
             var base64 = System.Convert.ToBase64String(bytes);
             var url = $"data:image/{GetMimeType(outputFormat)};base64,{base64}";
+            if (!Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+            {
+                Console.WriteLine($"Cannot crate uri for value '{url}'");
+                return new Uri($"http://localhost/{url}");
+            }
+
             return new Uri(url);
         }
 
