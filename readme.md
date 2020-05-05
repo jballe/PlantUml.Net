@@ -32,6 +32,11 @@ Remote rendering mode uses the PlantUml hosted service to render diagrams.
 
 Local rendering mode uses a local copy of PlantUml to render diagrams.
 
+### Local encode Rendering
+
+Uses local copy of PlantUml to generate complete source (eg. include local files) and then render with remote rendering
+
+
 #### Requirements
 
 ##### Java

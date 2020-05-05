@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Net.Http;
 using PlantUml.Net.InputModes;
 using PlantUml.Net.Java;
 using PlantUml.Net.Remote;
@@ -12,37 +10,20 @@ namespace PlantUml.Net.LocalEncode
         private readonly JarRunner _jarRunner;
         private readonly UrlFormatMap _urlFormatMap;
         private readonly InputFactory _inputFactory;
+        private readonly IPlantUmlRenderer _remoteRenderer;
 
-        internal LocalEncodePlantUmlRenderer(JarRunner jarRunner, UrlFormatMap urlFormatMap, InputFactory inputFactory)
+        internal LocalEncodePlantUmlRenderer(JarRunner jarRunner, UrlFormatMap urlFormatMap, InputFactory inputFactory, IPlantUmlRenderer remoteRenderer)
         {
             _jarRunner = jarRunner;
             _urlFormatMap = urlFormatMap;
             _inputFactory = inputFactory;
+            _remoteRenderer = remoteRenderer;
         }
 
         public byte[] Render(string code, OutputFormat outputFormat)
         {
-            var uri = RenderAsUri(code, outputFormat);
-            
-            // Ok this is copied from RemoteRenderer, consider alternatives
-            using (HttpClient httpClient = new HttpClient())
-            {
-                var task = httpClient.GetAsync(uri.ToString());
-                var result = task.ConfigureAwait(false).GetAwaiter().GetResult();
-
-                if (result.IsSuccessStatusCode)
-                {
-                    return result.Content.ReadAsByteArrayAsync().Result;
-                }
-
-                if (result.StatusCode == HttpStatusCode.BadRequest)
-                {
-                    var messages = result.Headers.GetValues("X-PlantUML-Diagram-Error");
-                    throw new RenderingException(code, string.Join(Environment.NewLine, messages));
-                }
-
-                throw new HttpRequestException(result.ReasonPhrase);
-            }
+            var allCode = Encode(code);
+            return _remoteRenderer.Render(allCode, outputFormat);
         }
 
         public Uri RenderAsUri(string code, OutputFormat outputFormat)
@@ -56,7 +37,6 @@ namespace PlantUml.Net.LocalEncode
         {
             using (var input = _inputFactory.Create(code))
             {
-
                 var processResult = _jarRunner.RunJarWithInput(input.Input, "-computeurl", input.Argument);
                 if (processResult.ExitCode != 0)
                 {

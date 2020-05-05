@@ -1,7 +1,6 @@
 ﻿using System;
 using PlantUml.Net.InputModes;
 using PlantUml.Net.Java;
-using PlantUml.Net.Remote;
 using static System.Text.Encoding;
 
 namespace PlantUml.Net.Local
@@ -10,15 +9,12 @@ namespace PlantUml.Net.Local
     {
         private readonly JarRunner jarRunner;
         private readonly LocalCommandProvider commandProvider;
-        private readonly RenderUrlCalculator renderUrlCalculator;
         private readonly InputFactory inputFactory;
 
-        public LocalPlantUmlRenderer(JarRunner jarRunner, LocalCommandProvider commandProvider,
-            RenderUrlCalculator renderUrlCalculator, InputFactory inputFactory)
+        public LocalPlantUmlRenderer(JarRunner jarRunner, LocalCommandProvider commandProvider, InputFactory inputFactory)
         {
             this.jarRunner = jarRunner;
             this.commandProvider = commandProvider;
-            this.renderUrlCalculator = renderUrlCalculator;
             this.inputFactory = inputFactory;
         }
 
@@ -41,8 +37,39 @@ namespace PlantUml.Net.Local
 
         public Uri RenderAsUri(string code, OutputFormat outputFormat)
         {
-            string renderUri = renderUrlCalculator.GetRenderUrl(code, outputFormat);
-            return new Uri(renderUri);
+            var bytes = Render(code, outputFormat);
+            var base64 = System.Convert.ToBase64String(bytes);
+            var url = $"data:image/{GetMimeType(outputFormat)};base64,{base64}";
+            return new Uri(url);
+        }
+
+        private static string GetMimeType(OutputFormat format)
+        {
+            switch (format)
+            {
+                case OutputFormat.Png:
+                case OutputFormat.Svg:
+                    return $"image/{format.ToString().ToLowerInvariant()}";
+
+                case OutputFormat.Eps:
+                    return "application/postscript";
+                case OutputFormat.Pdf:
+                    return "application/pdf";
+                case OutputFormat.Vdx:
+                    return "application/vnd.visio";
+                case OutputFormat.Xmi:
+                    return "application/xml";
+                case OutputFormat.Scxml:
+                    return "application/scxml+xml";
+                case OutputFormat.Html:
+                    return "text/html";
+                case OutputFormat.Ascii:
+                case OutputFormat.Ascii_Unicode:
+                case OutputFormat.LaTeX:
+                    return "text/plain";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
         }
     }
 }

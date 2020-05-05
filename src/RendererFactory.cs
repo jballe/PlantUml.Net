@@ -16,10 +16,15 @@ namespace PlantUml.Net
 
         public IPlantUmlRenderer CreateRenderer(PlantUmlSettings settings, string workingDir = null)
         {
+            return CreateRenderer(settings, workingDir, settings.RenderingMode);
+        }
+
+        private IPlantUmlRenderer CreateRenderer(PlantUmlSettings settings, string workingDir, RenderingMode mode)
+        {
             UrlFormatMap urlFormatMap = new UrlFormatMap(settings.RemoteUrl);
             RenderUrlCalculator renderUrlCalculator = new RenderUrlCalculator(urlFormatMap);
 
-            switch (settings.RenderingMode)
+            switch (mode)
             {
                 case RenderingMode.Remote:
 
@@ -29,10 +34,12 @@ namespace PlantUml.Net
 
                     JarRunner jarRunner = CreateJarRunner(settings);
                     LocalCommandProvider commandProvider = new LocalCommandProvider(settings.LocalGraphvizDotPath);
-                    return new LocalPlantUmlRenderer(jarRunner, commandProvider, renderUrlCalculator, new InputFactory(settings.InputMode, workingDir));
+                    return new LocalPlantUmlRenderer(jarRunner, commandProvider, new InputFactory(settings.InputMode, workingDir));
 
                 case RenderingMode.LocalEncode:
-                    return new LocalEncodePlantUmlRenderer(CreateJarRunner(settings), urlFormatMap, new InputFactory(settings.InputMode, workingDir));
+
+                    var remote = CreateRenderer(settings, workingDir, RenderingMode.Remote);
+                    return new LocalEncodePlantUmlRenderer(CreateJarRunner(settings), urlFormatMap, new InputFactory(settings.InputMode, workingDir), remote);
 
                 default:
                     throw new ArgumentException("invalid rendering mode", nameof(settings.RenderingMode));
