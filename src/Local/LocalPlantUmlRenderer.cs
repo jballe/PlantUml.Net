@@ -2,6 +2,7 @@
 using System.IO;
 using PlantUml.Net.InputModes;
 using PlantUml.Net.Java;
+using System.Threading.Tasks;
 using static System.Text.Encoding;
 
 namespace PlantUml.Net.Local
@@ -17,6 +18,11 @@ namespace PlantUml.Net.Local
             this.jarRunner = jarRunner;
             this.commandProvider = commandProvider;
             this.inputFactory = inputFactory;
+        }
+
+        public Task<byte[]> RenderAsync(string code, OutputFormat outputFormat)
+        {
+            return Task.FromResult(Render(code, outputFormat));
         }
 
         public byte[] Render(string code, OutputFormat outputFormat)
