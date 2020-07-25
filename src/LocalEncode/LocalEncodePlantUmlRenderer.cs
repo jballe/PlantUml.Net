@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using PlantUml.Net.InputModes;
 using PlantUml.Net.Java;
 using PlantUml.Net.Remote;
@@ -18,6 +19,11 @@ namespace PlantUml.Net.LocalEncode
             _urlFormatMap = urlFormatMap;
             _inputFactory = inputFactory;
             _remoteRenderer = remoteRenderer;
+        }
+
+        public Task<byte[]> RenderAsync(string code, OutputFormat outputFormat)
+        {
+            return Task.FromResult(Render(code, outputFormat));
         }
 
         public byte[] Render(string code, OutputFormat outputFormat)
